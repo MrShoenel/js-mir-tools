@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>AES-decode file names</title>
+  </head>
+  <body>
+    <textarea rows="5" cols="50" style="display:block; width:calc(100% - 1ex); min-height:4em; margin:0; padding:.5ex" placeholder="Put filenames to decrypt here, one per line"></textarea>
+    <pre></pre>
+
+    <script type="text/javascript" src="../node_modules/crypto-js/crypto-js.js"></script>
+    <script type="text/javascript">
+    (async() => {
+      const aesKey = 'x';
+
+      const encrypt = str => {
+        return CryptoJS.enc.Base64.parse(CryptoJS.AES.encrypt(str, aesKey).toString()).toString(CryptoJS.enc.Hex);
+      };
+
+      const decrypt = hexStr => {
+        return CryptoJS.AES.decrypt(CryptoJS.enc.Hex.parse(hexStr).toString(CryptoJS.enc.Base64), aesKey).toString(CryptoJS.enc.Utf8);
+      };
+
+      document.querySelector('textarea').addEventListener('input', evt => {
+        const lines = evt.target.value.split("\n")
+          .filter(l => l.trim() !== '')
+          .map(l => {
+            try {
+              const d = decrypt(l.split('_')[0]);
+              if (d === '') {
+                throw 'Invalid';
+              }
+              return d;
+            } catch (e) {
+              return `ERROR: ${e}`;
+            }
+          });
+
+        document.querySelector('pre').innerHTML = lines.join('\n');
+      });
+
+    })();
+    </script>
+  </body>
+</html>
